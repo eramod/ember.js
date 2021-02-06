@@ -1013,7 +1013,7 @@ moduleFor(
           () => {
             this.render(`{{input ${attrs.replace('%x', value)}}}`);
           },
-          /Passing the `@(disabled|placeholder|name|maxlength|minlength|size|tabindex)` argument to <Input> is deprecated\./
+          /Passing the `@(disabled|placeholder|name|maxlength|minlength|max|min|size|tabindex)` argument to <Input> is deprecated\./
         );
       }
 

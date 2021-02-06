@@ -1289,6 +1289,32 @@ moduleFor(
   }
 );
 
+class InputAttributesTest extends InputRenderingTest {
+  renderInput(attrs, value = 25) {
+    this.render(`<Input ${attrs.replace('%x', value)} />`);
+  }
+  ['@test value over default max but below set max is kept']() {
+    this.renderInput('25');
+    this.assertValue('25');
+  }
+  ['@test value below default min but above set min is kept']() {
+    this.renderInput('-2');
+    this.assertValue('-2');
+  }
+  ['@test in the valid default range is kept']() {
+    this.renderInput('5');
+    this.assertValue('5');
+  }
+  ['@test value above max is reset to max']() {
+    this.renderInput('55');
+    this.assertValue('50');
+  }
+  ['@test value below min is reset to min']() {
+    this.renderInput('-10');
+    this.assertValue('-5');
+  }
+}
+
 // These are the permutations of the set:
 // ['type="range"', 'min="-5" max="50"', value="%x"']
 [
@@ -1299,7 +1325,18 @@ moduleFor(
   'min="-5" max="50" @value="%x" @type="range"',
   '@value="%x" min="-5" max="50" @type="range"',
   '@value="%x" @type="range" min="-5" max="50"',
+].forEach((attrs) => {
+  moduleFor(
+    `[GH#15675] Components test: <Input ${attrs} />`,
+    class extends InputAttributesTest {
+      renderInput(value = 25) {
+        super.renderInput(attrs, value);
+      }
+    }
+  );
+});
 
+[
   // Named argument
   '@type="range" @min="-5" @max="50" @value="%x"',
   '@type="range" @value="%x" @min="-5" @max="50"',
@@ -1310,44 +1347,13 @@ moduleFor(
 ].forEach((attrs) => {
   moduleFor(
     `[GH#15675] Components test: <Input ${attrs} />`,
-    class extends InputRenderingTest {
+    class extends InputAttributesTest {
       renderInput(value = 25) {
-        if (attrs.match(/@min|@max/)) {
-          maybeExpectDeprecation(
-            EMBER_MODERNIZED_BUILT_IN_COMPONENTS,
-            () => {
-              this.render(`<Input ${attrs.replace('%x', value)} />`);
-            },
-            /Passing the `@.+` argument to <Input> is deprecated\./
-          );
-        } else {
-          this.render(`<Input ${attrs.replace('%x', value)} />`);
-        }
-      }
-
-      ['@test value over default max but below set max is kept']() {
-        this.renderInput('25');
-        this.assertValue('25');
-      }
-
-      ['@test value below default min but above set min is kept']() {
-        this.renderInput('-2');
-        this.assertValue('-2');
-      }
-
-      ['@test in the valid default range is kept']() {
-        this.renderInput('5');
-        this.assertValue('5');
-      }
-
-      ['@test value above max is reset to max']() {
-        this.renderInput('55');
-        this.assertValue('50');
-      }
-
-      ['@test value below min is reset to min']() {
-        this.renderInput('-10');
-        this.assertValue('-5');
+        maybeExpectDeprecation(
+          EMBER_MODERNIZED_BUILT_IN_COMPONENTS,
+          () => super.renderInput(attrs, value),
+          /Passing the `@(disabled|placeholder|name|maxlength|minlength|max|min|size|tabindex)` argument to <Input> is deprecated\./
+        );
       }
     }
   );
